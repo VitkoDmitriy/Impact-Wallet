@@ -12,7 +12,7 @@ export class OrgsController {
     constructor(private readonly orgsService: OrgsService) {
     }
 
-    @ApiOperation({ summary: 'Create user' })
+    @ApiOperation({ summary: 'Create organization' })
     @ApiResponse({ status: 201, type: Org })
     @Post()
     @UseInterceptors(FileInterceptor('image'))
