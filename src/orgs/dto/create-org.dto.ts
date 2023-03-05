@@ -5,5 +5,6 @@ export class CreateOrgDto {
 readonly name: string;
 @ApiProperty({example: 'Turn your time into equity', description: 'Information about the organization'})    
 readonly description: string;
+@ApiProperty({example: 'Logo of organizations', description: 'Logo of organizations'}) 
 image?: string;
 }
