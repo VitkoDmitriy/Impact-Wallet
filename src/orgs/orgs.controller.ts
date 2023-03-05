@@ -5,7 +5,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { OrgsService } from "./orgs.service";
 import { CreateOrgDto } from './dto/create-org.dto';
 
-@ApiTags('Users')
+@ApiTags('Orgs')
 @Controller('orgs')
 export class OrgsController {
 
