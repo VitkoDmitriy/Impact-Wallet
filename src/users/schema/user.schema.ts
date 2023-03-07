@@ -17,10 +17,6 @@ export class User {
   @Prop()
   name: string;
 
-  @ApiProperty({ example: 'Impact-Wallet', description: 'name of organizations' })
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: Org.name }] })
-  orgs: Org[];
-
   @ApiProperty({ example: 'jpg, png', description: 'Photo user profile' })
   @Prop()
   avatar: string;

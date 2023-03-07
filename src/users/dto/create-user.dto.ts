@@ -5,8 +5,6 @@ export class CreateUserDto {
     readonly nickname: string;
     @ApiProperty({ example: 'Dmitry Vitko', description: 'Name of user', required: true })
     readonly name: string;
-    @ApiProperty({ example: '11', description: 'Organization id', required: false })
-    readonly orgId?: string;
     @ApiProperty({ example: 'Profile picture', description: 'User photo', required: false })
     avatar?: string;
 }

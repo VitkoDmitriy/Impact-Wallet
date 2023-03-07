@@ -6,11 +6,12 @@ import { v4 as uuid } from 'uuid';
 import { Model } from 'mongoose';
 import { DuplicateNameException } from 'src/exceptions/duplicate-name.exception';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schema/user.schema';
 import { OrgsService } from 'src/orgs/orgs.service';
 import { ApiService } from 'src/api-service/api.service';
 import { CreateUserResponseDto } from './dto/create-user.response.dto';
+import { UsersFilter } from './users.filter.interface';
+import { omit } from 'lodash';
 
 @Injectable()
 export class UsersService {
@@ -27,19 +28,22 @@ export class UsersService {
         return users;
     }
 
-    async getUsersByNickName(name: String, req: Request): Promise<User[]> {
+    async getUsersByQuery(query: UsersFilter, req: Request): Promise<User[]> {
         await this.getUserFromToken(req);
-        const users = await this.getUsersByNicknamePrivate(name);
-        const response = [];
-        users.map((user) => {
-            response.push({
-                'nickname': user.nickname,
-                'name': user.name,
-                'orgs': user.orgs,
-                'wallet': user.wallet
-            })
-        });
 
+        const regex = {};
+        if (query.name) {
+            regex['name'] = new RegExp(query.name);
+        }
+        if (query.nickname) {
+            regex['nickname'] = new RegExp(query.nickname);
+        }
+
+        let users = await this.userRepository.find(regex).exec();
+        let response = [];
+        users.map(user => {
+            response.push(omit(user.toObject(), ['password']));
+        })
         return response;
     }
 
@@ -56,38 +60,39 @@ export class UsersService {
         const password = uuid();
         newUser.wallet = await this.apiService.createWallet(password);
 
-          if (userDto.orgId) {
-            const org = await this.orgService.getById(userDto.orgId)
-            newUser.orgs.push(org);
-        }
-
         newUser.password = await bcrypt.hash(password, 5);
         await newUser.save();
-
-        console.log(newUser);
 
         return await this.generateToken(newUser, password);
     }
 
-    async addUserToOrg(updateUserDto: UpdateUserDto, req: Request): Promise<User> {
-        const user = await this.getUserFromToken(req);
-        const oldUser = await this.userRepository.findOne({ name: user.name }).exec();
-        if (!oldUser) throw new NotFoundException(`User with name '${oldUser.name}' not found`);
-        const org = await this.orgService.getById(updateUserDto.orgId)
-        oldUser.orgs.push(org);
-        await oldUser.save();
-        return oldUser;
 
+    async getByUserId(id: String, req: Request): Promise<Object> {
+        await this.getUserFromToken(req);
+        let user = await this.userRepository.findById(id);
+        if (!user) throw new NotFoundException(`User with id '${user.id}' not found`);
+        return omit(user.toObject(), ['password']);
     }
 
+    // async addUserToOrg(updateUserDto: UpdateUserDto, req: Request): Promise<User> {
+    //     const user = await this.getUserFromToken(req);
+    //     const oldUser = await this.userRepository.findOne({ name: user.name }).exec();
+    //     if (!oldUser) throw new NotFoundException(`User with name '${oldUser.name}' not found`);
+    //     const org = await this.orgService.getById(updateUserDto.orgId)
+    //     oldUser.orgs.push(org);
+    //     await oldUser.save();
+    //     return oldUser;
+
+    // }
+
     private async generateToken(user: User, password: string): Promise<CreateUserResponseDto> {
-        const payload = { name: user.name, nickname: user.nickname, orgs: user.orgs, wallet: user.wallet }
+        const payload = { name: user.name, nickname: user.nickname, wallet: user.wallet }
         let response: CreateUserResponseDto = {
             secretLink: password,
             token: this.jwtService.sign(payload)
         }
-        
-        return response; 
+
+        return response;
     }
 
     async getUserFromToken(req: Request): Promise<User> {

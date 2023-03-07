@@ -1,12 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
-import { Member } from 'src/members/schema/member.schema';
+import { User } from 'src/users/schema/user.schema';
 
-export type OrgDocument = HydratedDocument<Org>;
+export type MemberDocument = HydratedDocument<Member>;
 
 @Schema()
-export class Org {
+export class Member {
 
     @ApiProperty({ example: 'Impact-Wallet', description: 'Name of organizations' })
     @Prop({unique: true})
@@ -21,9 +21,9 @@ export class Org {
     logo: string;
 
     @ApiProperty({ example: 'Impact-Wallet', description: 'name of organizations' })
-    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Member' }] })
-    members: Member[];
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+    user: User;
 
 }
 
-export const OrgSchema = SchemaFactory.createForClass(Org);
+export const OrgSchema = SchemaFactory.createForClass(Member);

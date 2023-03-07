@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { OrgsModule } from './orgs/orgs.module';
 import { ApiServiceModule } from './api-service/api.module';
+import { MembersModule } from './members/members.module';
 
 
 @Module({
@@ -16,6 +17,7 @@ import { ApiServiceModule } from './api-service/api.module';
         return connection;
       }
     }),
+    MembersModule,
   ],
 })
 
