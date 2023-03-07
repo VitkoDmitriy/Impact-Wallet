@@ -17,7 +17,7 @@ export class Org {
 
     @ApiProperty({ example: 'jpg, png', description: 'Logo organization' })
     @Prop()
-    image: string;
+    logo: string;
 
 }
 

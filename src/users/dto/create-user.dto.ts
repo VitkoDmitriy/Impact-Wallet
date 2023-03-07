@@ -1,11 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { Org } from "src/orgs/schema/org.schema";
 
 export class CreateUserDto {
-@ApiProperty({example: 'Dmitry', description: 'Name of user'})    
-readonly name: string;
-@ApiProperty({example: '11', description: 'Organization id number', required: false})    
-readonly org?: Org[];
-@ApiProperty({example: 'Profile picture', description: 'User photo', required: false}) 
-image?: string;
+    @ApiProperty({ example: 'Dmitry', description: 'Nickname of user', required: true })
+    readonly nickname: string;
+    @ApiProperty({ example: 'Dmitry Vitko', description: 'Name of user', required: true })
+    readonly name: string;
+    @ApiProperty({ example: '11', description: 'Organization id', required: false })
+    readonly orgId?: string;
+    @ApiProperty({ example: 'Profile picture', description: 'User photo', required: false })
+    avatar?: string;
 }

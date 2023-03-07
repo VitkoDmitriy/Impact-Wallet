@@ -6,5 +6,5 @@ readonly name: string;
 @ApiProperty({example: 'Turn your time into equity', description: 'Information about the organization', required: false})    
 readonly description: string;
 @ApiProperty({example: 'Logo of organizations', description: 'Logo of organizations', required: false}) 
-image?: string;
+logo?: string;
 }

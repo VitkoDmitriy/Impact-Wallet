@@ -9,17 +9,28 @@ export type UserDocument = HydratedDocument<User>;
 @Schema()
 export class User {
 
-  @ApiProperty({ example: 'Dmitry', description: 'Name of user' })
+  @ApiProperty({ example: 'Dmitry', description: 'Nickname of user' })
   @Prop({ unique: true })
+  nickname: string;
+
+  @ApiProperty({ example: 'Dmitry Vitko', description: 'Name of user' })
+  @Prop()
   name: string;
 
   @ApiProperty({ example: 'Impact-Wallet', description: 'name of organizations' })
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: Org.name }] })
-  org: Org[];
+  orgs: Org[];
 
   @ApiProperty({ example: 'jpg, png', description: 'Photo user profile' })
   @Prop()
-  image: string;
+  avatar: string;
+
+  @ApiProperty({ example: '6ZMDvWkKG9v7GhoTjCPd9FyVCQ36YVxxsB7W57At9ShD', description: 'User wallet' })
+  @Prop()
+  wallet: string;
+
+  @Prop()
+  password: string;
 
 }
 
