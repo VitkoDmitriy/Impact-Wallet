@@ -6,7 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schema/user.schema';
 import { UsersService } from './users.service';
 import { CreateUserResponseDto } from './dto/create-user.response.dto';
-import { UsersFilter } from './users.filter.interface';
+import { UsersFilter } from './dto/users.filter.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -36,7 +36,7 @@ export class UsersController {
     @ApiOperation({ summary: 'Get user by id' })
     @ApiResponse({ status: 200, type: User })
     @Get(':id')
-    getUserByName(@Param('id') id: string, @Req() req: Request): Promise<Object> {
+    getByUserId(@Param('id') id: string, @Req() req: Request): Promise<Object> {
         return this.userService.getByUserId(id, req);
     }
 }

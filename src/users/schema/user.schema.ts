@@ -2,7 +2,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Org } from 'src/orgs/schema/org.schema';
 
 export type UserDocument = HydratedDocument<User>;
 

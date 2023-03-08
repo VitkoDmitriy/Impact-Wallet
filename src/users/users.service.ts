@@ -10,7 +10,7 @@ import { User, UserDocument } from './schema/user.schema';
 import { OrgsService } from 'src/orgs/orgs.service';
 import { ApiService } from 'src/api-service/api.service';
 import { CreateUserResponseDto } from './dto/create-user.response.dto';
-import { UsersFilter } from './users.filter.interface';
+import { UsersFilter } from './dto/users.filter.dto';
 import { omit } from 'lodash';
 
 @Injectable()
@@ -31,20 +31,13 @@ export class UsersService {
     async getUsersByQuery(query: UsersFilter, req: Request): Promise<User[]> {
         await this.getUserFromToken(req);
 
-        const regex = {};
-        if (query.name) {
-            regex['name'] = new RegExp(query.name);
-        }
-        if (query.nickname) {
-            regex['nickname'] = new RegExp(query.nickname);
+        if (query.exactMatch) {
+
+            return await this.getUsersByQueryWithExactMatch(query, req);
+
         }
 
-        let users = await this.userRepository.find(regex).exec();
-        let response = [];
-        users.map(user => {
-            response.push(omit(user.toObject(), ['password']));
-        })
-        return response;
+        return await this.getUsersWithFilter(query, req);
     }
 
     async createUser(userDto: CreateUserDto, image: any): Promise<CreateUserResponseDto> {
@@ -105,6 +98,47 @@ export class UsersService {
         const user = this.jwtService.verify(token);
         return user;
 
+    }
+
+    private async getUsersByQueryWithExactMatch(query: UsersFilter, req: Request): Promise<User[]> {
+
+        const regex = {};
+        if (query.name) {
+            regex['name'] = query.name
+        }
+
+        if (query.nickname) {
+            regex['nickname'] = query.nickname;
+        }
+
+
+        let users = await this.userRepository.find(regex).exec();
+        let response = [];
+        users.map(user => {
+            response.push(omit(user.toObject(), ['password']));
+        })
+        return response;
+
+    }
+
+    private async getUsersWithFilter(query: UsersFilter, req: Request): Promise<User[]> {
+
+        const regex = {};
+        if (query.name) {
+            regex['name'] = new RegExp(query.name);
+        }
+        if (query.nickname) {
+            regex['nickname'] = new RegExp(query.nickname);
+        }
+
+        console.log(regex);
+
+        let users = await this.userRepository.find(regex).exec();
+        let response = [];
+        users.map(user => {
+            response.push(omit(user.toObject(), ['password']));
+        })
+        return response;
     }
 
 
