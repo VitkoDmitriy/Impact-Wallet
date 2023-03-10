@@ -1,9 +1,12 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Org } from './schema/org.schema';
 import { FileInterceptor } from "@nestjs/platform-express";
 import { OrgsService } from "./orgs.service";
 import { CreateOrgDto } from './dto/create-org.dto';
+import { OrgsFilter } from './dto/orgs.filter.dto';
+import { AddMemberToOrgDto } from 'src/members/dto/members.dto';
+import { Member } from 'src/members/schema/member.schema';
 
 @ApiTags('Orgs')
 @Controller('orgs')
@@ -18,14 +21,31 @@ export class OrgsController {
     @UseInterceptors(FileInterceptor('image'))
     @HttpCode(HttpStatus.CREATED)
     createOrg(@Body() createOrgDto: CreateOrgDto,
-        @UploadedFile() image): Promise<Org> {
-        return this.orgsService.createOrg(createOrgDto, image)
+        @UploadedFile() image,
+        @Req() req: Request): Promise<Org> {
+        return this.orgsService.createOrg(createOrgDto, image, req)
     }
 
-    @ApiOperation({ summary: 'Get organization by name' })
+    @ApiOperation({ summary: 'Get organization by query' })
     @ApiResponse({ status: 200, type: [Org] })
-    @Get(':name')
-    getUserByName(@Param('name') name: string): Promise<Org[]> {
-        return this.orgsService.getByName(name);
+    @Get()
+    getOrgsByQuery(@Query() query: OrgsFilter, @Req() req: Request): Promise<Org[]> {
+        return this.orgsService.getOrgsByQuery(query, req);
+    }
+
+    @ApiOperation({ summary: 'Get organization by id' })
+    @ApiResponse({ status: 200, type: Org })
+    @Get(':id')
+    getByUserId(@Param('id') id: string, @Req() req: Request): Promise<Object> {
+        return this.orgsService.getByOrgId(id, req);
+    }
+
+    @ApiOperation({ summary: 'Add member to organization' })
+    @ApiResponse({ status: 200, type: Member })
+    @Post(':id/users')
+    @HttpCode(HttpStatus.CREATED)
+    addMemberToOrg(@Param('id') id: string, @Body() addMemberToOrg: AddMemberToOrgDto,
+        @Req() req: Request): Promise<Member> {
+        return this.orgsService.addMemberToOrg(id, addMemberToOrg, req);
     }
 }

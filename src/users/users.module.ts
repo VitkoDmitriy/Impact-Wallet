@@ -12,10 +12,10 @@ import { UsersService } from './users.service';
     JwtModule.register({
         secret: process.env.PRIVATE_KEY || 'SECRET'
       }),
-      OrgsModule,
       ApiServiceModule
 ],
     providers: [UsersService],
-    controllers: [UsersController]
+    controllers: [UsersController],
+    exports: [UsersService]
 })
 export class UsersModule { }

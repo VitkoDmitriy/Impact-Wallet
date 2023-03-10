@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
+import { Member } from "src/members/schema/member.schema";
 
 export class CreateOrgDto {
     @ApiProperty({ example: 'Impact-Wallet', description: 'Name of organizations', required: true })
@@ -15,5 +16,8 @@ export class CreateOrgDto {
 
     @ApiProperty({ example: 'jpg, png', description: 'Logo organization', required: false })
     logo: string;
+
+    @ApiProperty({ example: '["0b1bd52d-7d8e-4518-b0a3-13ae5ad52d47","0sdfsdf-7234g-4sdf8-b13vc-dfcvb52d47"]', description: 'members of organizations', required: false })
+    members: Member[];
 
 }

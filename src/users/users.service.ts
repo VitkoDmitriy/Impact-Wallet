@@ -7,7 +7,6 @@ import { Model } from 'mongoose';
 import { DuplicateNameException } from 'src/exceptions/duplicate-name.exception';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User, UserDocument } from './schema/user.schema';
-import { OrgsService } from 'src/orgs/orgs.service';
 import { ApiService } from 'src/api-service/api.service';
 import { CreateUserResponseDto } from './dto/create-user.response.dto';
 import { UsersFilter } from './dto/users.filter.dto';
@@ -18,7 +17,6 @@ export class UsersService {
 
     constructor(@InjectModel(User.name) private userRepository: Model<UserDocument>,
         private jwtService: JwtService,
-        private orgService: OrgsService,
         private apiService: ApiService) { };
 
     async getUsersByNicknamePrivate(name: String): Promise<User[]> {
@@ -33,11 +31,11 @@ export class UsersService {
 
         if (query.exactMatch) {
 
-            return await this.getUsersByQueryWithExactMatch(query, req);
+            return await this.getUsersByQueryWithExactMatch(query);
 
         }
 
-        return await this.getUsersWithFilter(query, req);
+        return await this.getUsersWithFilter(query);
     }
 
     async createUser(userDto: CreateUserDto, image: any): Promise<CreateUserResponseDto> {
@@ -67,17 +65,6 @@ export class UsersService {
         return omit(user.toObject(), ['password']);
     }
 
-    // async addUserToOrg(updateUserDto: UpdateUserDto, req: Request): Promise<User> {
-    //     const user = await this.getUserFromToken(req);
-    //     const oldUser = await this.userRepository.findOne({ name: user.name }).exec();
-    //     if (!oldUser) throw new NotFoundException(`User with name '${oldUser.name}' not found`);
-    //     const org = await this.orgService.getById(updateUserDto.orgId)
-    //     oldUser.orgs.push(org);
-    //     await oldUser.save();
-    //     return oldUser;
-
-    // }
-
     private async generateToken(user: User, password: string): Promise<CreateUserResponseDto> {
         const payload = { name: user.name, nickname: user.nickname, wallet: user.wallet }
         let response: CreateUserResponseDto = {
@@ -90,6 +77,7 @@ export class UsersService {
 
     async getUserFromToken(req: Request): Promise<User> {
         const authHeader = req.headers['authorization'];
+        if (!authHeader) throw new UnauthorizedException({ message: 'User not authorized' });
         const bearer = authHeader.split(' ')[0]
         const token = authHeader.split(' ')[1]
         if (bearer !== 'Bearer' || !token) {
@@ -100,7 +88,7 @@ export class UsersService {
 
     }
 
-    private async getUsersByQueryWithExactMatch(query: UsersFilter, req: Request): Promise<User[]> {
+    private async getUsersByQueryWithExactMatch(query: UsersFilter): Promise<User[]> {
 
         const regex = {};
         if (query.name) {
@@ -121,7 +109,7 @@ export class UsersService {
 
     }
 
-    private async getUsersWithFilter(query: UsersFilter, req: Request): Promise<User[]> {
+    private async getUsersWithFilter(query: UsersFilter): Promise<User[]> {
 
         const regex = {};
         if (query.name) {
@@ -140,6 +128,5 @@ export class UsersService {
         })
         return response;
     }
-
 
 }
