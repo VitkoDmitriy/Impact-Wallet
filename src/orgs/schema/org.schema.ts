@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
-import { Member } from 'src/members/schema/member.schema';
+import { Member, MemberSchema } from 'src/members/schema/member.schema';
 
 export type OrgDocument = HydratedDocument<Org>;
 

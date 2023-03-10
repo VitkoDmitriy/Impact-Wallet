@@ -31,8 +31,8 @@ export class OrgsService {
 
         const newOrg = new this.orgRepository(orgsDto);
 
-        const password = uuid();
-        newOrg.wallet = await this.apiService.createWallet(password);
+        newOrg.password = uuid();
+        newOrg.wallet = await this.apiService.createWallet(newOrg.password);
         // let token = await this.apiService.createFungibleTokensForOrganization(newOrg.name, newOrg.wallet);
         newOrg.token = uuid();
         newOrg.mint = uuid();
@@ -54,7 +54,7 @@ export class OrgsService {
 
     async getByOrgId(id: String, req: Request): Promise<Object> {
         await this.usersService.getUserFromToken(req);
-        let org = await this.orgRepository.findById(id);
+        let org = await this.orgRepository.findById(id).populate({path : 'members', populate : { path : 'user'}});
         if (!org) throw new NotFoundException(`Organization with id '${org.id}' not found`);
         return omit(org.toObject(), ['password']);
     }
@@ -66,7 +66,7 @@ export class OrgsService {
             regex['name'] = query.name
         }
 
-        let orgs = await this.orgRepository.find(regex).exec();
+        let orgs = await this.orgRepository.find(regex).populate({path : 'members', populate : { path : 'user'}}).exec();
 
         let response = [];
         orgs.map(org => {
@@ -84,7 +84,7 @@ export class OrgsService {
 
         console.log(regex);
 
-        let orgs = await this.orgRepository.find(regex).exec();
+        let orgs = await this.orgRepository.find(regex).populate({path : 'members', populate : { path : 'user'}}).exec();
 
         let response = [];
         orgs.map(org => {
@@ -94,14 +94,11 @@ export class OrgsService {
     }
 
     async addMemberToOrg(id: string, addMemberToOrg: AddMemberToOrgDto, req: Request): Promise<Member> {
-        console.log(id);
-        console.log(addMemberToOrg);
         await this.usersService.getUserFromToken(req);
-        const org = await this.getByOrgId(id, req);
-
-        const password = uuid();
-
-
+        let org = await this.orgRepository.findById(id);
+        const member = await this.memberService.createMember(addMemberToOrg)
+        org.members.push(member);
+        org.save();
         return this.memberService.createMember(addMemberToOrg);
     }
 
