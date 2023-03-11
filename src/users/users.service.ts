@@ -4,13 +4,15 @@ import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcryptjs'
 import { v4 as uuid } from 'uuid';
 import { Model } from 'mongoose';
-import { DuplicateNameException } from 'src/exceptions/duplicate-name.exception';
+import { DuplicateNameException} from 'src/exceptions/duplicate-name.exception';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User, UserDocument } from './schema/user.schema';
 import { ApiService } from 'src/api-service/api.service';
 import { CreateUserResponseDto } from './dto/create-user.response.dto';
 import { UsersFilter } from './dto/users.filter.dto';
 import { omit } from 'lodash';
+import { SearchUserByNicknameDto } from './dto/search-user-by-nickname.dto';
+import { NicknameEmptyException } from 'src/exceptions/nickname-empty.exception';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +28,12 @@ export class UsersService {
         return users;
     }
 
+    async userExist(searchUserByNicknameDto: SearchUserByNicknameDto) {
+        const user = await this.userRepository.findOne({ nickname: searchUserByNicknameDto.nickname }).exec();        
+        if (!user) throw new NotFoundException(`User with nickname '${searchUserByNicknameDto.nickname}' not found`);
+        return searchUserByNicknameDto.nickname;
+    }
+
     async getUsersByQuery(query: UsersFilter, req: Request): Promise<User[]> {
         await this.getUserFromToken(req);
 
@@ -39,6 +47,7 @@ export class UsersService {
     }
 
     async createUser(userDto: CreateUserDto, image: any): Promise<CreateUserResponseDto> {
+        if (!userDto.nickname) throw new NicknameEmptyException('Nickname is empty');
         const oldUser = await this.userRepository.findOne({ nickname: userDto.nickname }).exec();
         if (oldUser) throw new DuplicateNameException(`User with nickname '${userDto.nickname}' already exists`);
 
